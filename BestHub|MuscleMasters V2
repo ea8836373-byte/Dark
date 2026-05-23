@@ -1,0 +1,254 @@
+-- Caricamento della libreria ufficiale Rayfield
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- Creazione della Finestra Principale
+local Window = Rayfield:CreateWindow({
+   Name = "BestHub | Muscle Master V2",
+   LoadingTitle = "BestHub Loading...",
+   LoadingSubtitle = "by AhmadSabbr",
+   ConfigurationSaving = {
+      Enabled = false
+   },
+   KeySystem = false
+})
+
+-- Variabili di controllo (Stato dei Cheat)
+_G.AutoFarm = false
+_G.SelectedGym = "Muscle Emperor"
+_G.SelectedExercise = "Pull Ups"
+_G.AutoPunch = false
+_G.TargetPlayer = ""
+_G.AutoEggs = false
+_G.SelectedEgg = "Common Egg"
+_G.AutoSpin = false
+_G.AutoChests = false
+
+-- ==========================================
+-- CATEGORIA 1: FARM
+-- ==========================================
+local FarmTab = Window:CreateTab("Farm", 4483345998)
+
+FarmTab:CreateDropdown({
+   Name = "Select Gym Location",
+   Options = {"Muscle Emperor", "Stone Gym", "Frost Gym", "Masters Gym"},
+   CurrentOption = {"Muscle Emperor"},
+   MultipleOptions = false,
+   Callback = function(Option)
+      _G.SelectedGym = Option[1]
+   end,
+})
+
+FarmTab:CreateDropdown({
+   Name = "Select Exercise",
+   Options = {"Pull Ups", "Rock Squats", "Treadmill"},
+   CurrentOption = {"Pull Ups"},
+   MultipleOptions = false,
+   Callback = function(Option)
+      _G.SelectedExercise = Option[1]
+   end,
+})
+
+FarmTab:CreateToggle({
+   Name = "Auto Farm Exercise",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoFarm = Value
+      task.spawn(function()
+         while _G.AutoFarm do
+            -- Fix: Verifica l'esistenza dei folder prima di inviare dati
+            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("RigEvents") and game:GetService("ReplicatedStorage").RigEvents:FindFirstChild("Train")
+            if remote then
+               remote:FireServer(_G.SelectedGym, _G.SelectedExercise)
+            end
+            task.wait(0.1)
+         end
+      end)
+   end,
+})
+
+-- ==========================================
+-- CATEGORIA 2: KILLING
+-- ==========================================
+local KillingTab = Window:CreateTab("Killing", 4483345998)
+
+KillingTab:CreateToggle({
+   Name = "Auto Punch / Strike",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoPunch = Value
+      task.spawn(function()
+         while _G.AutoPunch do
+            local character = game.Players.LocalPlayer.Character
+            -- Fix: Cerca qualsiasi strumento di attacco equipaggiato o nello zaino
+            local tool = character:FindFirstChildOfClass("Tool") or game.Players.LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+            if tool then
+               if tool.Parent == game.Players.LocalPlayer.Backpack then
+                  tool.Parent = character -- Equipaggia automaticamente
+               end
+               tool:Activate()
+            end
+            task.wait(0.05)
+         end
+      end)
+   end,
+})
+
+KillingTab:CreateInput({
+   Name = "Target Player Name",
+   PlaceholderText = "Username...",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      _G.TargetPlayer = Text
+   end,
+})
+
+KillingTab:CreateButton({
+   Name = "Target Kill (Teleport)",
+   Callback = function()
+      local p2 = game.Players:FindFirstChild(_G.TargetPlayer)
+      if p2 and p2.Character and p2.Character:FindFirstChild("HumanoidRootPart") then
+         local myChar = game.Players.LocalPlayer.Character
+         if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+            -- Fix: Teletrasporto sicuro offset dietro la schiena del player
+            myChar.HumanoidRootPart.CFrame = p2.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
+         end
+      end
+   end,
+})
+
+-- ==========================================
+-- CATEGORIA 3: PETS HATCH
+-- ==========================================
+local PetsTab = Window:CreateTab("Pets Hatch", 4483345998)
+
+PetsTab:CreateDropdown({
+   Name = "Select Egg Rarity",
+   Options = {"Common Egg", "Uncommon Egg", "Rare Egg", "Epic Egg", "Mythic Egg"},
+   CurrentOption = {"Common Egg"},
+   MultipleOptions = false,
+   Callback = function(Option)
+      _G.SelectedEgg = Option[1]
+   end,
+})
+
+PetsTab:CreateToggle({
+   Name = "Auto Open Eggs",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoEggs = Value
+      task.spawn(function()
+         while _G.AutoEggs do
+            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("RigEvents") and game:GetService("ReplicatedStorage").RigEvents:FindFirstChild("BuyEgg")
+            if remote then
+               remote:FireServer(_G.SelectedEgg)
+            end
+            task.wait(0.4)
+         end
+      end)
+   end,
+})
+
+-- ==========================================
+-- CATEGORIA 4: VIEW STATS
+-- ==========================================
+local StatsTab = Window:CreateTab("View Stats", 4483345998)
+
+StatsTab:CreateButton({
+   Name = "Print Server Leaderboard Stats",
+   Callback = function()
+      for _, plyr in pairs(game.Players:GetChildren()) do
+         local leaderstats = plyr:FindFirstChild("leaderstats")
+         local k = leaderstats and leaderstats:FindFirstChild("Kills") and leaderstats.Kills.Value or 0
+         local r = leaderstats and leaderstats:FindFirstChild("Rebirths") and leaderstats.Rebirths.Value or 0
+         
+         -- Fix: Genera una notifica Rayfield pulita in-game senza aprire la console
+         Rayfield:Notify({
+            Title = "Stats: " .. plyr.Name,
+            Content = "Kills: " .. tostring(k) .. " | Rebirths: " .. tostring(r),
+            Duration = 3
+         })
+      end
+   end,
+})
+
+-- ==========================================
+-- CATEGORIA 5: MISC
+-- ==========================================
+local MiscTab = Window:CreateTab("Misc", 4483345998)
+
+MiscTab:CreateToggle({
+   Name = "Auto Spin Wheel",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoSpin = Value
+      task.spawn(function()
+         while _G.AutoSpin do
+            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("RigEvents") and game:GetService("ReplicatedStorage").RigEvents:FindFirstChild("SpinWheel")
+            if remote then
+               remote:FireServer()
+            end
+            task.wait(5)
+         end
+      end)
+   end,
+})
+
+MiscTab:CreateToggle({
+   Name = "Auto Claim Chests",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoChests = Value
+      task.spawn(function()
+         while _G.AutoChests do
+            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("RigEvents") and game:GetService("ReplicatedStorage").RigEvents:FindFirstChild("ClaimChest")
+            if remote then
+               remote:FireServer()
+            end
+            task.wait(10)
+         end
+      end)
+   end,
+})
+
+MiscTab:CreateButton({
+   Name = "Redeem All Free Codes",
+   Callback = function()
+      local codes = {"RELEASE", "MUSCLE2026", "FREESTRENGTH", "FIXES"}
+      local remote = game:GetService("ReplicatedStorage"):FindFirstChild("RigEvents") and game:GetService("ReplicatedStorage").RigEvents:FindFirstChild("RedeemCode")
+      if remote then
+         for _, c in pairs(codes) do
+            remote:FireServer(c)
+            task.wait(0.2)
+         end
+      end
+   end,
+})
+
+MiscTab:CreateSlider({
+   Name = "WalkSpeed Custom",
+   Min = 16,
+   Max = 500,
+   CurrentValue = 16,
+   Flag = "WS",
+   Callback = function(Value)
+      -- Fix: Aggiunto controllo continuo per resettare la velocità se resettata dal gioco
+      task.spawn(function()
+         if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+         end
+      end)
+   end,
+})
+
+MiscTab:CreateSlider({
+   Name = "Jump Power Custom",
+   Min = 50,
+   Max = 400,
+   CurrentValue = 50,
+   Flag = "JP",
+   Callback = function(Value)
+      if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+         game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+      end
+   end,
+})
