@@ -1,11 +1,11 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "BC9 || NINJA LEGENDS",
+    Name = "BestHub | Ninja legends v2",
     LoadingTitle = "Ninja Legends Hub",
-    LoadingSubtitle = "by BC_rider9 (Fixed for Delta)",
+    LoadingSubtitle = "by KyoYT",
     ConfigurationSaving = {
-        Enabled = false -- Disattivato di default per velocizzare il caricamento iniziale
+        Enabled = false
     },
     Discord = {
         Enabled = false,
@@ -208,7 +208,7 @@ farm:CreateToggle({
                     pcall(function()
                         LocalPlayer.ninjaEvent:FireServer("swingKatana")
                     end)
-                    task.wait(0.05) -- Leggera pausa per evitare freeze dell'auto-swing
+                    task.wait(0.05)
                 end
             end)
         end
@@ -422,7 +422,6 @@ farm:CreateToggle({
     end
 })
 
--- Caricamento dinamico sicuro delle isole
 local ISLAND = {}
 pcall(function()
     for _, v in pairs(game.workspace.islandUnlockParts:GetChildren()) do
@@ -538,7 +537,7 @@ misc:CreateToggle({
                 while _G.iJump do
                     pcall(function()
                         if LocalPlayer:FindFirstChild("multiJumpCount") then
-                            LocalPlayer.multiJumpCount.Value = 9999999 -- Rimosse le virgolette per passarlo come numero puro se richiesto dal gioco
+                            LocalPlayer.multiJumpCount.Value = 9999999
                         end
                     end)
                     task.wait(1)
